@@ -62,4 +62,31 @@ router.post('/login', (req,res,next)=>{
   passportFunction(req,res,next);//call f right after we defined it
 });
 
+router.post('/logout', (req,res,next)=>{
+  req.logout();
+  res.status(200).json({ message: 'Success'});
+});
+
+router.get('/loggedin', (req,res,next)=>{
+
+  if (req.isAuthenticated()) {
+    res.status(200).json(req.user); //The user logged in -> send user info to client
+    return;
+  }
+
+  //User is not logged in
+  res.status(401).json({ message: 'Unauthorized.'});
+});
+
+function ensureLoggedIn( req, res, next){
+  if(!req.isAuthenticated()){
+    res.status(403).json({ message: 'FORBIDDEN.'});//Accessing page that requires logging in, and you not logged in
+    return;
+  }
+  next();
+}
+router.get('/private', ensureLoggedIn, (req,res,next)=>{
+  res.json({ message: 'You are lucky'});//you goood to go
+});
+
 module.exports = router;

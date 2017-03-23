@@ -4,7 +4,7 @@ const passport  = require('passport');
 const bcrypt    = require('bcrypt');
 const User      = require('../models/user');
 
-router.post('/signup',(req,res,next)=>{
+router.post('/signup', (req,res,next)=>{
   const username = req.body.username;
   const password = req.body.password;
   const nickname = req.body.nickname;
@@ -40,9 +40,26 @@ router.post('/signup',(req,res,next)=>{
 
         res.status(200).json(req.user);//req.user is defined because we logged in
       });
-
     });
   });
+});
+
+router.post('/login', (req,res,next)=>{
+  const passportFunction = passport.authenticate('local', (err,theUser, failureDetails) => {
+
+    if(err) return res.status(500).json({ message: 'Something went wrong.'});
+
+    if(!theUser) return res.status(401).json(failureDetails);
+
+    req.login(theUser, (err)=>{ //LOGIN
+        if(err) return res.status(500).json({ message: 'Something went wrong.'});
+
+        res.status(200).json(req.user);
+    });
+
+  });
+
+  passportFunction(req,res,next);//call f right after we defined it
 });
 
 module.exports = router;
